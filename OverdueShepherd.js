@@ -31,6 +31,14 @@ function cleanTitle(title) {
   return title.replace(/\s+/g, " ").trim();
 }
 
+// EventKit priority: 0=none, 1=High, 5=Medium, 9=Low
+// 1d -> Low, 2d -> Medium, 3d+ -> High
+function priorityForDays(n) {
+  if (n >= 3) return 1;
+  if (n === 2) return 5;
+  return 9;
+}
+
 async function main() {
   const today0 = startOfToday();
   const reminders = await Reminder.allIncomplete();
@@ -48,17 +56,20 @@ async function main() {
 
     if (due >= today0 && m) {
       r.title = cleanTitle(r.title.replace(TAG_RE, ""));
+      r.priority = 0;
       r.save();
       resetCount++;
     } else if (due < today0 && m) {
       const n = parseInt(m[1], 10) + 1;
       r.title = cleanTitle(r.title.replace(TAG_RE, `#postponed_${n}d`));
       r.dueDate = shiftDateKeepingTime(due);
+      r.priority = priorityForDays(n);
       r.save();
       bumpedCount++;
     } else if (due < today0 && !m) {
       r.title = `${cleanTitle(r.title)} #postponed_1d`;
       r.dueDate = shiftDateKeepingTime(due);
+      r.priority = priorityForDays(1);
       r.save();
       taggedCount++;
     }
