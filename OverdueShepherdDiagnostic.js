@@ -2,6 +2,9 @@
 // icon-color: deep-gray; icon-glyph: stethoscope;
 
 // OverdueShepherdDiagnostic
+// Version: 1.0.0 (2026-04-26)
+// Repo:    https://github.com/khidaka/overdue-shepherd
+//
 // 全リスト横断で未完了リマインダーをダンプし、OverdueShepherd 本体が
 // どのケース判定をするかを副作用なしで確認する診断スクリプト。
 

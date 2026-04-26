@@ -2,6 +2,9 @@
 // icon-color: deep-brown; icon-glyph: hat-cowboy;
 
 // OverdueShepherd
+// Version: 1.0.0 (2026-04-26)
+// Repo:    https://github.com/khidaka/overdue-shepherd
+//
 // Apple リマインダーの期限切れタスクを毎朝「世話」するスクリプト。
 //
 // 全リスト横断で未完了リマインダーを走査し、以下 3 ケースを処理する。
