@@ -2,7 +2,7 @@
 // icon-color: deep-brown; icon-glyph: hat-cowboy;
 
 // OverdueShepherd
-// Version: 1.1.0 (2026-04-29)
+// Version: 1.2.0 (2026-04-30)
 // Repo:    https://github.com/khidaka/overdue-shepherd
 //
 // Apple リマインダーの期限切れタスクを毎朝「世話」するスクリプト。
@@ -14,6 +14,10 @@
 //
 // 期日を今日に変更する際、元の時刻成分は保持する (年月日のみ書き換え)。
 // 完了済み・期日なしのリマインダーは触らない。
+//
+// 注: 旗(isFlagged)の朝リセットは Scriptable の Reminder API が flag 属性を
+//     公開していないため不可能。iOS ショートカット側で「フラグ付きリマインダーを
+//     取得 → フラグを外す」を本スクリプト実行前後に挟んで対応する (README 参照)。
 
 const TAG_RE = /\((\d+)日遅延\)/;
 

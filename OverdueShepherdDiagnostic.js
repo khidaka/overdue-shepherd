@@ -2,11 +2,13 @@
 // icon-color: deep-gray; icon-glyph: stethoscope;
 
 // OverdueShepherdDiagnostic
-// Version: 1.1.0 (2026-04-29)
+// Version: 1.2.0 (2026-04-30)
 // Repo:    https://github.com/khidaka/overdue-shepherd
 //
 // 全リスト横断で未完了リマインダーをダンプし、OverdueShepherd 本体が
 // どのケース判定をするかを副作用なしで確認する診断スクリプト。
+// v1.2.0: アプリ内実行時に QuickLook で全件、Alert でサマリを表示。
+//         ショートカット実行時はレポート全文を返す。
 
 const TAG_RE = /\((\d+)日遅延\)/;
 
@@ -37,22 +39,39 @@ async function main() {
   const today0 = startOfToday();
   const reminders = await Reminder.allIncomplete();
 
-  console.log(`Found ${reminders.length} incomplete reminder(s). today0=${fmt(today0)}`);
-  console.log("---");
+  const lines = [];
+  lines.push(`Found ${reminders.length} incomplete reminder(s). today0=${fmt(today0)}`);
+  lines.push("---");
 
   const buckets = { A: 0, B: 0, C: 0, skip: 0 };
 
   for (const r of reminders) {
     const verdict = classify(r, today0);
-    console.log(`[${verdict}] "${r.title}" due=${fmt(r.dueDate)} list=${r.calendar ? r.calendar.title : "?"}`);
+    lines.push(`[${verdict}] "${r.title}" due=${fmt(r.dueDate)} list=${r.calendar ? r.calendar.title : "?"}`);
     if (verdict.startsWith("A")) buckets.A++;
     else if (verdict.startsWith("B")) buckets.B++;
     else if (verdict.startsWith("C")) buckets.C++;
     else buckets.skip++;
   }
 
-  console.log("---");
-  console.log(`Summary: A(reset)=${buckets.A} B(bump)=${buckets.B} C(tag)=${buckets.C} skip=${buckets.skip}`);
+  lines.push("---");
+  const summary = `Summary: A(reset)=${buckets.A} B(bump)=${buckets.B} C(tag)=${buckets.C} skip=${buckets.skip}`;
+  lines.push(summary);
+
+  const report = lines.join("\n");
+  console.log(report);
+
+  if (config.runsInApp) {
+    // 件数が多いと Alert では読めないため QuickLook で全文表示
+    await QuickLook.present(report, false);
+    const a = new Alert();
+    a.title = "OverdueShepherdDiagnostic";
+    a.message = summary;
+    a.addAction("OK");
+    await a.present();
+  } else {
+    Script.setShortcutOutput(report);
+  }
 }
 
 await main();
