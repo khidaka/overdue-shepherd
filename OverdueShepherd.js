@@ -2,20 +2,24 @@
 // icon-color: deep-brown; icon-glyph: hat-cowboy;
 
 // OverdueShepherd
-// Version: 1.0.0 (2026-04-26)
+// Version: 1.1.0 (2026-04-29)
 // Repo:    https://github.com/khidaka/overdue-shepherd
 //
 // Apple リマインダーの期限切れタスクを毎朝「世話」するスクリプト。
 //
 // 全リスト横断で未完了リマインダーを走査し、以下 3 ケースを処理する。
-//   ケース A: 期日が今日以降 + #postponed_Nd タグあり -> タグ除去 (リセット)
-//   ケース B: 期日が過去      + #postponed_Nd タグあり -> N+1 にして期日を今日へ
-//   ケース C: 期日が過去      + タグなし               -> #postponed_1d を付与し期日を今日へ
+//   ケース A: 期日が今日以降 + (N日遅延) タグあり -> タグ除去 (リセット)
+//   ケース B: 期日が過去      + (N日遅延) タグあり -> N+1 にして期日を今日へ
+//   ケース C: 期日が過去      + タグなし           -> (1日遅延) を付与し期日を今日へ
 //
 // 期日を今日に変更する際、元の時刻成分は保持する (年月日のみ書き換え)。
 // 完了済み・期日なしのリマインダーは触らない。
 
-const TAG_RE = /#postponed_(\d+)d\b/;
+const TAG_RE = /\((\d+)日遅延\)/;
+
+function makeTag(n) {
+  return `(${n}日遅延)`;
+}
 
 function startOfToday() {
   const d = new Date();
@@ -64,13 +68,13 @@ async function main() {
       resetCount++;
     } else if (due < today0 && m) {
       const n = parseInt(m[1], 10) + 1;
-      r.title = cleanTitle(r.title.replace(TAG_RE, `#postponed_${n}d`));
+      r.title = cleanTitle(r.title.replace(TAG_RE, makeTag(n)));
       r.dueDate = shiftDateKeepingTime(due);
       r.priority = priorityForDays(n);
       r.save();
       bumpedCount++;
     } else if (due < today0 && !m) {
-      r.title = `${cleanTitle(r.title)} #postponed_1d`;
+      r.title = `${cleanTitle(r.title)} ${makeTag(1)}`;
       r.dueDate = shiftDateKeepingTime(due);
       r.priority = priorityForDays(1);
       r.save();

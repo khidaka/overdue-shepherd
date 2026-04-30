@@ -2,13 +2,13 @@
 // icon-color: deep-gray; icon-glyph: stethoscope;
 
 // OverdueShepherdDiagnostic
-// Version: 1.0.0 (2026-04-26)
+// Version: 1.1.0 (2026-04-29)
 // Repo:    https://github.com/khidaka/overdue-shepherd
 //
 // 全リスト横断で未完了リマインダーをダンプし、OverdueShepherd 本体が
 // どのケース判定をするかを副作用なしで確認する診断スクリプト。
 
-const TAG_RE = /#postponed_(\d+)d\b/;
+const TAG_RE = /\((\d+)日遅延\)/;
 
 function startOfToday() {
   const d = new Date();
@@ -27,9 +27,9 @@ function classify(r, today0) {
   const due = r.dueDate;
   if (!due) return "skip(no due)";
   const m = r.title.match(TAG_RE);
-  if (due >= today0 && m) return `A:reset (drop #postponed_${m[1]}d)`;
-  if (due < today0 && m) return `B:bump (#postponed_${m[1]}d -> #postponed_${parseInt(m[1], 10) + 1}d)`;
-  if (due < today0 && !m) return "C:tag (add #postponed_1d)";
+  if (due >= today0 && m) return `A:reset (drop (${m[1]}日遅延))`;
+  if (due < today0 && m) return `B:bump ((${m[1]}日遅延) -> (${parseInt(m[1], 10) + 1}日遅延))`;
+  if (due < today0 && !m) return "C:tag (add (1日遅延))";
   return "skip(no-op)";
 }
 
